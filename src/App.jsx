@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from 'react';
+import React, { useState, useContext, useRef, useCallback, useMemo } from 'react';
 import { Route, Routes, BrowserRouter, Link } from 'react-router-dom';
 import Home from './components/Home';
 import AboutUs from './components/AboutUs';
@@ -19,14 +19,14 @@ const TextInput = () => {
   const inputRef = useRef(null);
   const [text, setText] = useState('');
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     inputRef.current.value = '';
     setText('');
-  };
+  }, []);
 
-  const handleInputChange = () => {
+  const handleInputChange = useCallback(() => {
     setText(inputRef.current.value);
-  };
+  }, []);
 
   return (
     <div>
@@ -37,12 +37,30 @@ const TextInput = () => {
   );
 };
 
+const ItemList = () => {
+  const handleItemClick = useCallback((index) => {
+    console.log(`Item clicked at index: ${index}`);
+  }, []);
+
+  const items = useMemo(() => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], []);
+
+  return (
+    <div>
+      {items.map((item, index) => (
+        <div key={index} onClick={() => handleItemClick(index)}>
+          Item {item}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState('light');
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
@@ -80,15 +98,8 @@ const App = () => {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/ref" element={<TextInput />} />
-        <Route
-          path="/context"
-          element={
-            <ThemeProvider>
-              <Header />
-              <Content />
-            </ThemeProvider>
-          }
-        />
+        <Route path="/context" element={<ThemeProvider><Header /><Content /></ThemeProvider>} />
+        <Route path="/callback" element={<ItemList />} />
         <Route path="*" element={<NotFound404 />} />
       </Routes>
     </BrowserRouter>
